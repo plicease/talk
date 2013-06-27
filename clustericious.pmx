@@ -1,0 +1,150 @@
+---
+# version
+date: 2 Junly 2013
+author: Graham THE Ollis
+company: dc.pm.org
+location: dc.pm.org
+title: RESTful APIs in Perl with Clustericious
+theme: yatil
+
+css: |
+  div.slide ul li li { margin-top: 0; }
+  div.slide ul li { margin-top: 0.25em; }
+  div.slide ul { margin-bottom: 0.25em; }
+  pre.sh_perl { margin-top: 0.5em; margin-bottom: 0.5em; }
+  div.slide p { margin-top: 0.5em; margin-bottom: 0.5em; }
+  div.slide table tr td { border: 1px solid black; padding-left: 1em; padding-right: 1em; text-align: center; }
+  div.slide table tr th { border: 1px solid black; padding-left: 1em; padding-right: 1em; text-align: center; }
+
+title_page:
+  - (and Mojolicious)
+  - Graham THE Ollis
+  - 2 July 2013
+
+slides:
+  - - Overview
+    - Web Services
+    - REST
+    - Platforms
+    - Clustericious
+  - - Web Service
+    - html: |
+              <table>
+                <thead>
+                  <tr>
+                    <th>protocol</th><th>layer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="2">web service</td>
+                  </tr>
+                  <tr>
+                    <td>HTTP</td><td>application</td>
+                  </tr>
+                  <tr>
+                    <td>TCP</td><td>transport</td>
+                  </tr>
+                  <tr>
+                    <td>Ethernet</td><td>link</td>
+                  </tr>
+                  <tr>
+                    <td>IEE 802.3u</td><td>physical</td>
+                  </tr>
+                </tbody>
+              </table>
+                
+  - - Web Services
+    - SOAP
+    - - SOAP::Lite
+    - XML-RPC
+    - - XML::RPC
+      - RPC::XML
+    - REST
+    - - Catalyst
+      - Mojolicious
+      - Clustericious
+      - Dancer
+  - - Mojolicious::Lite
+    - p: A simple example
+    - sh_perl: |
+                 #!/usr/bin/perl
+                 use Mojolicious:Lite
+                 
+                 get '/:foo' => sub {
+                   my $self = shift;
+                   my $foo  = $self->param('foo');
+                   $self->render(text => "Hello from $foo.");
+                 };
+                 
+                 app->start;
+  - - Mojolicious::Lite
+    - p: With a default argument
+    - sh_perl: |
+                 #!/usr/bin/perl
+                 use Mojolicious:Lite
+                 
+                 get '/:foo' => { foo => 'mojolicious' } => sub {
+                   my $self = shift;
+                   my $foo  = $self->param('foo');
+                   $self->render(text => "Hello from $foo.");
+                 };
+              
+                 app->start;
+  - - Mojolicious (full app)
+    - Traffic cone for when the site goes down.
+    - sh_perl: |
+                 package App::TrafficCone;
+                 
+                 use Mojo::Base qw( Mojolicious );
+                 
+                 sub startup {
+                   my($self, $config) = @_;
+                   $self->routes->any('/*x' => { x => 'y' } => sub {
+                     my $c = shift;
+                     $c->render( 
+                       text   => 'Down for maintenance', 
+                       status => 503,
+                     );
+                   }
+                 }
+                 
+                 1;
+  - - Mojolicious (full app)
+    - Starter script for App::TrafficCone.
+    - sh_perl: |
+                 #!/usr/bin/perl
+                 use Mojolicious::Commands;
+                 Mojolicious::Commands->start_app('App::TrafficCone');
+  - - Mojolicious::Lite (revisited)
+    - Same script as a mojo lite app
+    - sh_perl: |
+                 #!/usr/bin/perl
+                 use Mojolicious::Lite;
+                 any '/*x' => { x => 'y' } => sub {
+                   my $c = shift;
+                   $c->render(
+                     text   => 'Down for maintenance',
+                     status => 503,
+                   );
+                 }
+                 
+                 app->start;
+  - - Mojolicious full vs. lite
+    - dichotomy
+    - mental context-switch
+    - no automatic migration
+  - - Clustericious
+    - YourApp.pm inherits from Clustericious::App
+    - standard set of routes pre-included
+    - - /version
+      - /status
+      - /api
+    - Has a Mojolicious::Lite style YourApp/Routes.pm file
+    - Other classes are (usually) the model
+  - - Clustericious::Client
+    - YourApp/Client.pm inherits from Clustericious::Client
+    - define api using meta definitions
+    - - you get a basic Perl client for free
+      - you get a command line client for free
+      - can generate JavaScript client using meta data
