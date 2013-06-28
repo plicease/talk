@@ -53,6 +53,10 @@ slides:
       height: 16
     - html:
         file: network.html
+  - - Firewalls
+    - html: |
+              <!-- 10x6.74 -->
+              <img style="height: 15em; width: 10.11em;" src="http://www.wdlabs.com/twilight/media/130628/gt0_2257.jpg" />
   - - Web Service
     - sh_xml:
         file: soap.xml
@@ -74,30 +78,29 @@ slides:
     - html:
         file: rest.html
   - - REST request vs. browser request
-    - same resource
-    - REST
-    - html: |
-              <pre>
-              GET /book/978-3-16-148410-0.json
-              </pre>
-    - Browser
-    - html: |
-              <pre>
-              GET /book/978-3-16-148410-0.html
-              </pre>
-    - or use content negotiation
-    - html: |
-              <pre>
-              GET /book/978-3-16-148410-0
-              </pre>
-  - - REST request vs. browser request
-    - same code handles all three types of requests
-    - sh_perl: |
-                 get '/book/:isbn' => sub {
-                   my($c) = @_;
-                   my $book = lookup_book_by_isbn($c->param('isbn'));
-                   $c->{autodata} = $book->as_hash;
-                 }
+    - one resource
+    - - REST
+      - html: |
+                <pre>
+                GET /book/978-3-16-148410-0.json
+                </pre>
+      - Browser
+      - html: |
+                <pre>
+                GET /book/978-3-16-148410-0.html
+                </pre>
+      - or use content negotiation
+      - html: |
+                <pre>
+                GET /book/978-3-16-148410-0
+                </pre>
+    - one handler
+    - - sh_perl: |
+                   get '/book/:isbn' => sub {
+                     my($c) = @_;
+                     my $book = lookup_book_by_isbn($c->param('isbn'));
+                     $c->{autodata} = $book->as_hash;
+                   }
   - - Web Services
     - SOAP
     - - SOAP::Lite
@@ -109,6 +112,17 @@ slides:
       - Mojolicious
       - Clustericious
       - Dancer
+  - - Mojolicious
+    - Good
+    - - Complete web client/server framework
+      - No non-core dependencies
+      - Non-blocking (uses EV if available)
+      - WebSockets
+      - Consistent and well covered documentation
+    - Bad
+    - - Not invented here 
+      - API somewhat unstable
+      - Documentation is not always helpful
 
 ###
 ### Mojolicious::Lite
@@ -165,24 +179,35 @@ slides:
 ### - Server
 
   - - Clustericious
-    - YourApp.pm inherits from Clustericious::App
-    - standard set of routes pre-included
+    - bin/yourapp
+    - YourApp -> inherits Clustericious::App
+    - YourApp::Routes -> uses Clustericious::RouteBuilder
+    - model (if needed) goes anywhere
+    - standard set of routes
     - - /version
       - /status
       - /api
-    - Has a Mojolicious::Lite style YourApp/Routes.pm file
-    - Other classes are (usually) the model
+      - /api/:table
 
 ###
 ### Clustericious
-### - Server
+### - Client
 
   - - Clustericious::Client
-    - YourApp/Client.pm inherits from Clustericious::Client
-    - define api using meta definitions
-    - - you get a basic Perl client for free
-      - you get a command line client for free
-      - can generate JavaScript client using meta data
+    - bin/yourappclient
+    - YourApp::Client ->uses Clustericious::Client
+    - sh_perl: |
+                  package YourApp::Client;
+                  use Clustericious::Client;
+                  
+                  route welcome => 'GET', '/';
+                  route auth => 'GET', '/auth';
+
+#    - YourApp/Client.pm inherits from Clustericious::Client
+#    - define api using meta definitions
+#    - - you get a basic Perl client for free
+#      - you get a command line client for free
+#      - can generate JavaScript client using meta data
 
 ###
 ### Clustericious
