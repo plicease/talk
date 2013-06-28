@@ -11,10 +11,17 @@ css: |
   div.slide ul li li { margin-top: 0; }
   div.slide ul li { margin-top: 0.25em; }
   div.slide ul { margin-bottom: 0.25em; }
-  pre.sh_perl { margin-top: 0.5em; margin-bottom: 0.5em; }
+  div.slide pre.sh_perl { margin-top: 0.5em; margin-bottom: 0.5em; }
   div.slide p { margin-top: 0.5em; margin-bottom: 0.5em; }
-  div.slide table tr td { border: 1px solid black; padding-left: 1em; padding-right: 1em; text-align: center; }
-  div.slide table tr th { border: 1px solid black; padding-left: 1em; padding-right: 1em; text-align: center; }
+  div.slide table.protocol_stack { width: 100%; font-size: 0.6em; }
+  div.slide table.protocol_stack tr td { border: 1px solid black; padding-left: 1em; padding-right: 1em; text-align: center; }
+  div.slide table.protocol_stack tr th {
+    border: 1px solid black;
+    padding-left: 1em;
+    padding-right: 1em; text-align: center;
+    width: 50%;
+  }
+  div.slide pre { font-size: 0.5em; }
 
 title_page:
   - (and Mojolicious)
@@ -24,36 +31,73 @@ title_page:
 slides:
   - - Overview
     - Web Services
-    - REST
-    - Platforms
+    - - XML-RPC/SOAP
+      - REST
+    - Mojolicious::Lite
     - Clustericious
+    - - Server
+      - Client
+      - Config
+    - Example Services
+    - - PlugAuth
+      - Yars
+      
+###
+### Web Services
+### - XML-RPC/SOAP
+### - REST
+
+  - - Network Service
+    - text:
+        file: ftp.txt
+      height: 16
+    - html:
+        file: network.html
   - - Web Service
+    - sh_xml:
+        file: soap.xml
+      height: 16
+    - html:
+        file: web.html
+  - - RESTful Web Service
     - html: |
-              <table>
-                <thead>
-                  <tr>
-                    <th>protocol</th><th>layer</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colspan="2">web service</td>
-                  </tr>
-                  <tr>
-                    <td>HTTP</td><td>application</td>
-                  </tr>
-                  <tr>
-                    <td>TCP</td><td>transport</td>
-                  </tr>
-                  <tr>
-                    <td>Ethernet</td><td>link</td>
-                  </tr>
-                  <tr>
-                    <td>IEE 802.3u</td><td>physical</td>
-                  </tr>
-                </tbody>
-              </table>
-                
+              <pre style="height: 16em">
+              PUT /book/978-3-16-148410-0
+              GET /book/978-3-16-148410-0
+              POST /book/978-3-16-148410-0
+              DELETE /book/978-3-16-148410-0
+              
+              Formats: JSON, XML, YAML, JPEG, etc.
+              (whatever is appropriate)
+              Content negotiation
+              </pre>
+    - html:
+        file: rest.html
+  - - REST request vs. browser request
+    - same resource
+    - REST
+    - html: |
+              <pre>
+              GET /book/978-3-16-148410-0.json
+              </pre>
+    - Browser
+    - html: |
+              <pre>
+              GET /book/978-3-16-148410-0.html
+              </pre>
+    - or use content negotiation
+    - html: |
+              <pre>
+              GET /book/978-3-16-148410-0
+              </pre>
+  - - REST request vs. browser request
+    - same code handles all three types of requests
+    - sh_perl: |
+                 get '/book/:isbn' => sub {
+                   my($c) = @_;
+                   my $book = lookup_book_by_isbn($c->param('isbn'));
+                   $c->{autodata} = $book->as_hash;
+                 }
   - - Web Services
     - SOAP
     - - SOAP::Lite
@@ -65,6 +109,10 @@ slides:
       - Mojolicious
       - Clustericious
       - Dancer
+
+###
+### Mojolicious::Lite
+
   - - Mojolicious::Lite
     - p: A simple example
     - sh_perl: |
@@ -92,10 +140,9 @@ slides:
               
                  app->start;
   - - Mojolicious (full app)
-    - Traffic cone for when the site goes down.
+    - Traffic cone (substitute website during maintenance)
     - sh_perl: |
                  package App::TrafficCone;
-                 
                  use Mojo::Base qw( Mojolicious );
                  
                  sub startup {
@@ -108,32 +155,15 @@ slides:
                      );
                    }
                  }
-                 
-                 1;
-  - - Mojolicious (full app)
-    - Starter script for App::TrafficCone.
     - sh_perl: |
                  #!/usr/bin/perl
                  use Mojolicious::Commands;
                  Mojolicious::Commands->start_app('App::TrafficCone');
-  - - Mojolicious::Lite (revisited)
-    - Same script as a mojo lite app
-    - sh_perl: |
-                 #!/usr/bin/perl
-                 use Mojolicious::Lite;
-                 any '/*x' => { x => 'y' } => sub {
-                   my $c = shift;
-                   $c->render(
-                     text   => 'Down for maintenance',
-                     status => 503,
-                   );
-                 }
-                 
-                 app->start;
-  - - Mojolicious full vs. lite
-    - dichotomy
-    - mental context-switch
-    - no automatic migration
+
+###
+### Clustericious
+### - Server
+
   - - Clustericious
     - YourApp.pm inherits from Clustericious::App
     - standard set of routes pre-included
@@ -142,9 +172,41 @@ slides:
       - /api
     - Has a Mojolicious::Lite style YourApp/Routes.pm file
     - Other classes are (usually) the model
+
+###
+### Clustericious
+### - Server
+
   - - Clustericious::Client
     - YourApp/Client.pm inherits from Clustericious::Client
     - define api using meta definitions
     - - you get a basic Perl client for free
       - you get a command line client for free
       - can generate JavaScript client using meta data
+
+###
+### Clustericious
+### - Config
+
+  - - Clustericious::Config
+    - YAML or JSON format
+    - Used by both clients and servers
+    - Preprocessed using Mojo::Template
+    - One config can "call" or "include" another
+    - text:
+        file: PlugAuth.conf
+  - - Clustericious::Config
+    - text:
+        file: common.conf
+  - - Clustericious::Config
+    - text:
+        file: PlugAuth.debug
+      height: 28
+
+###
+### Example Services
+### - PlugAuth
+
+###
+### Example Services
+### - Yars

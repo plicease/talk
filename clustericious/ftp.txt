@@ -1,0 +1,15 @@
+220 ProFTPD 1.3.3a Server (Debian) [::ffff:10.10.16.1]
+user ollisg
+331 Password required for ollisg
+pass secret
+230 User ollisg logged in
+help
+214-The following commands are recognized (* =>'s unimplemented):
+214-CWD     XCWD    CDUP    XCUP    SMNT*   QUIT    PORT    PASV    
+214-EPRT    EPSV    ALLO*   RNFR    RNTO    DELE    MDTM    RMD     
+214-XRMD    MKD     XMKD    PWD     XPWD    SIZE    SYST    HELP    
+214-NOOP    FEAT    OPTS    AUTH*   CCC*    CONF*   ENC*    MIC*    
+214-PBSZ*   PROT*   TYPE    STRU    MODE    RETR    STOR    STOU    
+214-APPE    REST    ABOR    USER    PASS    ACCT*   REIN*   LIST    
+214-NLST    STAT    SITE    MLSD    MLST    
+214 Direct comments to root@web01.sydney.wdlabs.com

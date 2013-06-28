@@ -1,0 +1,101 @@
+[/home/ollisg/etc/PlugAuth.conf :: template]
+---
+% use File::HomeDir;
+% my $data = File::HomeDir->my_home . '/var/plugauth';
+
+% extends_config 'common', port => 3001, app => 'plugauth';
+
+user_file: <%= $data %>/password
+group_file: <%= $data %>/group
+resource_file: <%= $data %>/resource
+host_file: <%= $data %>/host
+
+
+plugins:
+  - PlugAuth::Plugin::WebUI: {}
+  - PlugAuth::Plugin::Audit: {}
+
+
+[/home/ollisg/etc/common.conf :: template]
+---
+% use File::HomeDir;
+% my $ip = "198.61.169.5";
+
+% my $run = File::HomeDir->my_home . "/var/run";
+% system 'mkdir', '-p', $run;
+
+% my $home = File::HomeDir->my_home . "/var/$app";
+% system 'mkdir', '-p', $home;
+
+simple_auth:
+  url: http://<%= $ip %>:3001
+
+url: http://<%= $ip %>:<%= $port %>
+
+start_mode: hypnotoad
+
+hypnotoad:
+  heartbeat_timeout: 500
+  pid_file: <%= $run %>/<%= $app %>-hypnotoad.pid
+  listen:
+    - http://<%= $ip %>:<%= $port %>
+  env:
+    MOJO_HOME: <%= $home %>
+
+
+[/home/ollisg/etc/common.conf :: interpreted]
+---
+
+
+
+simple_auth:
+  url: http://198.61.169.5:3001
+
+url: http://198.61.169.5:3001
+
+start_mode: hypnotoad
+
+hypnotoad:
+  heartbeat_timeout: 500
+  pid_file: /home/ollisg/var/run/plugauth-hypnotoad.pid
+  listen:
+    - http://198.61.169.5:3001
+  env:
+    MOJO_HOME: /home/ollisg/var/plugauth
+
+
+[/home/ollisg/etc/PlugAuth.conf :: interpreted]
+---
+
+
+user_file: /home/ollisg/var/plugauth/password
+group_file: /home/ollisg/var/plugauth/group
+resource_file: /home/ollisg/var/plugauth/resource
+host_file: /home/ollisg/var/plugauth/host
+
+
+plugins:
+  - PlugAuth::Plugin::WebUI: {}
+  - PlugAuth::Plugin::Audit: {}
+
+
+[merged]
+---
+group_file: /home/ollisg/var/plugauth/group
+host_file: /home/ollisg/var/plugauth/host
+hypnotoad:
+  env:
+    MOJO_HOME: /home/ollisg/var/plugauth
+  heartbeat_timeout: 500
+  listen:
+  - http://198.61.169.5:3001
+  pid_file: /home/ollisg/var/run/plugauth-hypnotoad.pid
+plugins:
+- PlugAuth::Plugin::WebUI: {}
+- PlugAuth::Plugin::Audit: {}
+resource_file: /home/ollisg/var/plugauth/resource
+simple_auth:
+  url: http://198.61.169.5:3001
+start_mode: hypnotoad
+url: http://198.61.169.5:3001
+user_file: /home/ollisg/var/plugauth/password
