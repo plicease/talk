@@ -61,7 +61,7 @@ slides:
     - - Most client systems have a private IP behind a transparent proxy
     - Firewalls
     - - Most non-http traffic is blocked
-    - Duplication
+    - Duplication of effort
     - - Exceptions, error handling
       - Data transport
               
@@ -71,6 +71,25 @@ slides:
       height: 16
     - html:
         file: web.html
+  - - What is wrong with that?
+    - HTTP is just a wrapper for XML-PRC/SOAP
+    - - on the upside can be used over other protocols (e.g. SMTP, XMPP)
+    - XML
+    - - verbose
+      - doesn't represent either objects or database rows well
+  - - RESTful Web Service
+    - Each object you care about is a resource, or URL
+    - html: |
+               <pre>
+               /book/:isbn
+               </pre>
+    - Create/modify/retrieve using standard HTTP verbs
+    - html: |
+               <pre>
+               GET /book/978-3-16-148410-0
+               </pre>
+    - maps nicely to a relational database
+    - Format of object is not part of REST
   - - RESTful Web Service
     - one resource
     - - REST
@@ -134,17 +153,16 @@ slides:
     - - Not invented here 
       - API somewhat unstable
       - Documentation is not always helpful
-  - - Mojolicious::Lite
-    - All the goodness of a Mojolicious app in a single script
-    - - code
-      - templates
-      - static resources
 
 ###
 ### Mojolicious::Lite
 
   - - Mojolicious::Lite
-    - p: A simple example
+    - All the goodness of a Mojolicious app in a single script
+    - - code
+      - templates
+      - static resources
+    - 'example:'
     - sh_perl: |
                  #!/usr/bin/perl
                  use Mojolicious:Lite
@@ -246,11 +264,32 @@ slides:
       height: 28
 
 ###
+### Clustericious
+### - Testing
+
+  - - Clustericious testing
+    - Test::Mojo
+    - - there is also a Test::Clustericious but doesn't do much yet
+    - Test::Clustericious::Config
+    - - test multiple apps
+    - Test::PlugAuth
+    - - test YourApp against simple PlugAuth service
+    - Test::PlugAuth::Plugin
+    - - test PlugAuth::Plugin::YourPlugin against standard Plugin tests
+
+###
 ### Example Services
 ### - PlugAuth
 
   - - PlugAuth
     - Authentication service for itself and other Clustericious apps
+    - Pluggable
+    - - Flat files
+      - LDAP
+      - DBI
+    - Extendable
+    - - PlugAuth::WebUI
+      - PlugAuth::Plugin::Audit
 
 ###
 ### Example Services
@@ -258,5 +297,24 @@ slides:
 
   - - Yars
     - Archive service
-    - PUT filename
-    - GET filename md5sum
+    - Store/retrieve files
+    - - PUT filename
+      - GET filename md5sum
+
+###
+### See Also
+###
+
+  - - See also
+    - Slides
+    - - http://perl.wdlabs.com/talk/20130702-clustericious
+    - Contact the current maintainer
+    - - plicease at cpan dot org
+      - http://github.com/plicease
+    - CPAN
+    - - Clustericious
+      - PugAuth
+      - Yars
+      - Mojolicious
+    - Mojolicious website
+    - - http://mojolicio.us
