@@ -1,0 +1,28 @@
+% clustericious generate app MyApp
+  [mkdir] MyApp
+  [write] MyApp/MANIFEST
+  [exist] MyApp
+  [write] MyApp/Build.PL
+  [mkdir] MyApp/bin
+  [write] MyApp/bin/myapp
+  [chmod] MyApp/bin/myapp 744
+  [mkdir] MyApp/eg
+  [write] MyApp/eg/log4perl.conf
+  [exist] MyApp/eg
+  [write] MyApp/eg/nginx.conf
+  [exist] MyApp/eg
+  [write] MyApp/eg/hypnotoad.conf
+  [exist] MyApp/eg
+  [write] MyApp/eg/MyApp.conf
+  [exist] MyApp/eg
+  [write] MyApp/eg/MyApp.sample.conf
+  [mkdir] MyApp/t
+  [write] MyApp/t/001_basic.t
+  [exist] MyApp/t
+  [write] MyApp/t/999_pod_coverage.t
+  [exist] MyApp/t
+  [write] MyApp/t/999_pod.t
+  [mkdir] MyApp/lib
+  [write] MyApp/lib/MyApp.pm
+  [mkdir] MyApp/lib/MyApp
+  [write] MyApp/lib/MyApp/Routes.pm

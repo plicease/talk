@@ -1,0 +1,4 @@
+% mojo generate lite_app myapp
+  [exist] /tmp
+  [write] /tmp/myapp
+  [chmod] myapp 744

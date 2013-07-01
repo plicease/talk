@@ -1,0 +1,16 @@
+% dzil new -P Clustericious MyApp
+[DZ] making target dir /tmp/MyApp
+[DZ] adding /Changes
+[DZ] adding /bin/myapp
+[DZ] adding /eg/log4perl.conf
+[DZ] adding /eg/nginx.conf
+[DZ] adding /eg/hypnotoad.conf
+[DZ] adding /eg/MyApp.conf
+[DZ] adding /eg/MyApp.sample.conf
+[DZ] adding /t/001_basic.t
+[DZ] adding /t/999_pod_coverage.t
+[DZ] adding /t/999_pod.t
+[DZ] adding /lib/MyApp/Routes.pm
+[DZ] adding /lib/MyApp.pm
+[DZ] writing files to /tmp/MyApp
+[DZ] dist minted in ./MyApp

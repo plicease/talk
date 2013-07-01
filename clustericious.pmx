@@ -6,6 +6,7 @@ company: dc.pm.org
 location: dc.pm.org
 title: RESTful APIs in Perl with Clustericious
 theme: yatil
+name: 20130702-clustericious
 
 css: |
   div.slide ul li li { margin-top: 0; }
@@ -174,19 +175,11 @@ slides:
                  };
                  
                  app->start;
-  - - Mojolicious::Lite
-    - p: With a default argument
-    - sh_perl: |
-                 #!/usr/bin/perl
-                 use Mojolicious:Lite
-                 
-                 get '/:foo' => { foo => 'mojolicious' } => sub {
-                   my $self = shift;
-                   my $foo  = $self->param('foo');
-                   $self->render(text => "Hello from $foo.");
-                 };
-              
-                 app->start;
+  - - Mojolicious::Lite getting started
+    - text:
+        file: gen_lite.txt
+    - sh_perl:
+        file: myapp.pl
   - - Mojolicious (full app)
     - Traffic cone (substitute website during maintenance)
     - sh_perl: |
@@ -207,6 +200,12 @@ slides:
                  #!/usr/bin/perl
                  use Mojolicious::Commands;
                  Mojolicious::Commands->start_app('App::TrafficCone');
+  - - Mojolicious::Lite getting started
+    - text:
+        file: gen_mojo.txt
+  - - Mojolicious migrating
+    - Migrating from Mojolicious::Lite to full app is fairly easy
+    - ... but not automatic
 
 ###
 ### Clustericious
@@ -224,6 +223,15 @@ slides:
       - /status
       - /api
       - /api/:table
+  - - Clustericious code generation
+    - mojolicious style
+    - text:
+        file: gen_cluster.txt
+      height: 11
+    - Dist::Zilla style via Dist::Zilla::MintingProfile::Clustericious
+    - text:
+        file: gen_dzil.txt
+      height: 11
   - - Clustericious deployment
     - hypnotoad
     - apache

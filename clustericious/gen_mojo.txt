@@ -1,0 +1,17 @@
+% mojo generate app MyApp
+  [mkdir] /tmp/my_app/script
+  [write] /tmp/my_app/script/my_app
+  [chmod] my_app/script/my_app 744
+  [mkdir] /tmp/my_app/lib
+  [write] /tmp/my_app/lib/MyApp.pm
+  [mkdir] /tmp/my_app/lib/MyApp
+  [write] /tmp/my_app/lib/MyApp/Example.pm
+  [mkdir] /tmp/my_app/t
+  [write] /tmp/my_app/t/basic.t
+  [mkdir] /tmp/my_app/log
+  [mkdir] /tmp/my_app/public
+  [write] /tmp/my_app/public/index.html
+  [mkdir] /tmp/my_app/templates/layouts
+  [write] /tmp/my_app/templates/layouts/default.html.ep
+  [mkdir] /tmp/my_app/templates/example
+  [write] /tmp/my_app/templates/example/welcome.html.ep
