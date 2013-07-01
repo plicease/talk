@@ -53,10 +53,18 @@ slides:
       height: 16
     - html:
         file: network.html
-  - - Firewalls
+  - - What is wrong with that?
     - html: |
               <!-- 10x6.74 -->
-              <img style="height: 15em; width: 10.11em;" src="http://www.wdlabs.com/twilight/media/130628/gt0_2257.jpg" />
+              <img style="height: 15em; width: 10.11em;" src="http://www.wdlabs.com/twilight/media/130628/gt0_2257.jpg" align="right" />
+    - IPv4 address exhaustion
+    - - Most client systems have a private IP behind a transparent proxy
+    - Firewalls
+    - - Most non-http traffic is blocked
+    - Duplication
+    - - Exceptions, error handling
+      - Data transport
+              
   - - Web Service
     - sh_xml:
         file: soap.xml
@@ -64,20 +72,6 @@ slides:
     - html:
         file: web.html
   - - RESTful Web Service
-    - html: |
-              <pre style="height: 16em">
-              PUT /book/978-3-16-148410-0
-              GET /book/978-3-16-148410-0
-              POST /book/978-3-16-148410-0
-              DELETE /book/978-3-16-148410-0
-              
-              Formats: JSON, XML, YAML, JPEG, etc.
-              (whatever is appropriate)
-              Content negotiation
-              </pre>
-    - html:
-        file: rest.html
-  - - REST request vs. browser request
     - one resource
     - - REST
       - html: |
@@ -101,7 +95,21 @@ slides:
                      my $book = lookup_book_by_isbn($c->param('isbn'));
                      $c->{autodata} = $book->as_hash;
                    }
-  - - Web Services
+  - - RESTful Web Service
+    - html: |
+              <pre style="height: 16em">
+              PUT /book/978-3-16-148410-0
+              GET /book/978-3-16-148410-0
+              POST /book/978-3-16-148410-0
+              DELETE /book/978-3-16-148410-0
+              
+              Formats: JSON, XML, YAML, JPEG, etc.
+              (whatever is appropriate)
+              Content negotiation
+              </pre>
+    - html:
+        file: rest.html
+  - - Web Services Options in Perl
     - SOAP
     - - SOAP::Lite
     - XML-RPC
@@ -115,14 +123,22 @@ slides:
   - - Mojolicious
     - Good
     - - Complete web client/server framework
-      - No non-core dependencies
-      - Non-blocking (uses EV if available)
+      - No non-core dependencies (5.10.1 or better)
+      - Non-blocking
+      - - <i>a la</i> node.js
+        - uses EV if available
       - WebSockets
+      - - like tcp for http
       - Consistent and well covered documentation
     - Bad
     - - Not invented here 
       - API somewhat unstable
       - Documentation is not always helpful
+  - - Mojolicious::Lite
+    - All the goodness of a Mojolicious app in a single script
+    - - code
+      - templates
+      - static resources
 
 ###
 ### Mojolicious::Lite
@@ -182,12 +198,19 @@ slides:
     - bin/yourapp
     - YourApp -> inherits Clustericious::App
     - YourApp::Routes -> uses Clustericious::RouteBuilder
-    - model (if needed) goes anywhere
+    - - (basically Mojolicious::Lite routing)
+    - YourApp::Model (or ::Data or whatever)
+    - - can use Module::Build::Database
     - standard set of routes
     - - /version
       - /status
       - /api
       - /api/:table
+  - - Clustericious deployment
+    - hypnotoad
+    - apache
+    - nginx
+    - etc.
 
 ###
 ### Clustericious
@@ -203,12 +226,6 @@ slides:
                   route welcome => 'GET', '/';
                   route auth => 'GET', '/auth';
 
-#    - YourApp/Client.pm inherits from Clustericious::Client
-#    - define api using meta definitions
-#    - - you get a basic Perl client for free
-#      - you get a command line client for free
-#      - can generate JavaScript client using meta data
-
 ###
 ### Clustericious
 ### - Config
@@ -217,7 +234,7 @@ slides:
     - YAML or JSON format
     - Used by both clients and servers
     - Preprocessed using Mojo::Template
-    - One config can "call" or "include" another
+    - One config can inherit from another using extends_config
     - text:
         file: PlugAuth.conf
   - - Clustericious::Config
@@ -232,6 +249,14 @@ slides:
 ### Example Services
 ### - PlugAuth
 
+  - - PlugAuth
+    - Authentication service for itself and other Clustericious apps
+
 ###
 ### Example Services
 ### - Yars
+
+  - - Yars
+    - Archive service
+    - PUT filename
+    - GET filename md5sum
