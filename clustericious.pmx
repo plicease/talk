@@ -73,49 +73,52 @@ slides:
     - html:
         file: web.html
   - - What is wrong with that?
-    - HTTP is just a wrapper for XML-PRC/SOAP
-    - - on the upside can be used over other protocols (e.g. SMTP, XMPP)
+    - html: |
+              <!-- 10x6.74 -->
+              <img style="height: 15em; width: 10.11em;" src="http://www.wdlabs.com/twilight/media/130702/gt0_0953.jpg" align="right" />
+    - SOAP is an additional layer on top of HTTP
+    - - "advantage: tunnel over SMTP, XMPP, etc."
     - XML
     - - verbose
       - doesn't represent either objects or database rows well
     - Business logic duplication
+    - - http://website/page.html
+      - http://website/rpc
   - - RESTful Web Service
-    - Each object you care about is a resource, or URL
     - html: |
-               <pre>
-               /book/:isbn
-               </pre>
+              <!-- 10x6.74 -->
+              <img style="height: 15em; width: 10.11em;" src="http://www.wdlabs.com/twilight/media/130702/gt0_2819.jpg" align="right" />
+    - Each class/object you expose via your API is a resource, or URL
+    - - /book/:isbn
     - Create/modify/retrieve using standard HTTP verbs
-    - html: |
-               <pre>
-               GET /book/978-3-16-148410-0
-               </pre>
+    - - <tt>GET /book/978-3-16-148410-0</tt>
     - maps nicely to a relational database
     - Format of object is not part of REST
-  - - RESTful Web Service
-    - one resource
-    - - REST
-      - html: |
-                <pre>
-                GET /book/978-3-16-148410-0.json
-                </pre>
-      - Browser
-      - html: |
-                <pre>
-                GET /book/978-3-16-148410-0.html
-                </pre>
-      - or use content negotiation
-      - html: |
-                <pre>
-                GET /book/978-3-16-148410-0
-                </pre>
+  - - RESTful Web Service formats
+    - For CPUs, JSON/XML/YAML
+    - html: |
+              <pre>
+              GET /book/978-3-16-148410-0.json
+              GET /book/978-3-16-148410-0.yml
+              GET /book/978-3-16-148410-0.xml
+              </pre>
+    - For Humans, HTML
+    - html: |
+              <pre>
+              GET /book/978-3-16-148410-0.html
+              </pre>
+    - or use content negotiation
+    - html: |
+              <pre>
+              GET /book/978-3-16-148410-0
+              </pre>
     - one handler
-    - - sh_perl: |
-                   get '/book/:isbn' => sub {
-                     my($c) = @_;
-                     my $book = lookup_book_by_isbn($c->param('isbn'));
-                     $c->{autodata} = $book->as_hash;
-                   }
+    - sh_perl: |
+                 get '/book/:isbn' => sub {
+                   my($c) = @_;
+                   my $book = lookup_book_by_isbn($c->param('isbn'));
+                   $c->{autodata} = $book->as_hash;
+                 }
   - - RESTful Web Service
     - html: |
               <pre style="height: 16em">
@@ -144,13 +147,13 @@ slides:
   - - Mojolicious
     - Good
     - - Complete web client/server framework
-      - No non-core dependencies (5.10.1 or better)
+      - No non-core dependencies (does require perl 5.10.1)
       - Non-blocking
       - - <i>a la</i> node.js
         - uses EV if available
       - WebSockets
       - - like tcp for http
-      - Consistent and well covered documentation
+      - Documentation is consistent and has good coverage
     - Bad
     - - Not invented here 
       - API somewhat unstable
@@ -181,6 +184,9 @@ slides:
         file: gen_lite.txt
     - sh_perl:
         file: myapp.pl
+  - - Websocket/non-blocking example
+    - sh_perl:
+        file: createrepo.pl
   - - Mojolicious (full app)
     - Traffic cone (substitute website during maintenance)
     - sh_perl: |
@@ -237,6 +243,8 @@ slides:
     - hypnotoad
     - apache
     - nginx
+    - lighttpd
+    - plackup
     - etc.
 
 ###
@@ -285,7 +293,6 @@ slides:
 
   - - Clustericious testing
     - Test::Mojo
-    - - there is also a Test::Clustericious but doesn't do much yet
     - Test::Clustericious::Config
     - - test multiple apps
     - Test::PlugAuth
@@ -326,13 +333,14 @@ slides:
   - - See also
     - Slides
     - - http://perl.wdlabs.com/talk/20130702-clustericious
+    - Database integration
+    - - Module::Build::Database, Rose::DB::Object
     - Contact the current maintainer
     - - plicease at cpan dot org
       - http://github.com/plicease
     - CPAN
     - - Clustericious
-      - PugAuth
-      - Yars
+      - PugAuth, Yars
       - Mojolicious
     - Mojolicious website
     - - http://mojolicio.us
