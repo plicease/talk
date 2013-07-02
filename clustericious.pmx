@@ -78,6 +78,7 @@ slides:
     - XML
     - - verbose
       - doesn't represent either objects or database rows well
+    - Business logic duplication
   - - RESTful Web Service
     - Each object you care about is a resource, or URL
     - html: |
@@ -243,7 +244,6 @@ slides:
 ### - Client
 
   - - Clustericious::Client
-    - bin/yourappclient
     - YourApp::Client ->uses Clustericious::Client
     - sh_perl: |
                   package YourApp::Client;
@@ -251,6 +251,14 @@ slides:
                   
                   route welcome => 'GET', '/';
                   route auth => 'GET', '/auth';
+    - bin/yourappclient
+    - sh_perl: |
+                  #!/usr/bin/perl
+                  use YourApp;
+                  use Clustericious::Client::Command;
+                  Clustericious::Client::Command->run(
+                    YourApp::Client->new, @ARGV,
+                  );
 
 ###
 ### Clustericious
@@ -284,6 +292,8 @@ slides:
     - - test YourApp against simple PlugAuth service
     - Test::PlugAuth::Plugin
     - - test PlugAuth::Plugin::YourPlugin against standard Plugin tests
+    - Test::Clustericious::Cluster
+    - - coming soon! Test an entire cluster of services
 
 ###
 ### Example Services
