@@ -117,7 +117,7 @@ slides:
                  get '/book/:isbn' => sub {
                    my($c) = @_;
                    my $book = lookup_book_by_isbn($c->param('isbn'));
-                   $c->{autodata} = $book->as_hash;
+                   $c->stash->{autodata} = $book->as_hash;
                  }
   - - RESTful Web Service
     - html: |
