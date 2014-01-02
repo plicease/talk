@@ -1,0 +1,295 @@
+---
+date: 7 January 2014
+author: Graham THE Ollis
+company: dc.pm.org
+location: dc.pm.org
+title: Adventures with Alien and FFI
+theme: yatil
+name: 20140107-alienffi
+
+css: |
+  div.slide ul li li { margin-top: 0; }
+  div.slide ul li { margin-top: 0.25em; }
+  div.slide ul { margin-bottom: 0.25em; }
+  div.slide pre.sh_perl { margin-top: 0.5em; margin-bottom: 0.5em; }
+  div.slide p { margin-top: 0.5em; margin-bottom: 0.5em; }
+  div.slide table.protocol_stack { width: 100%; font-size: 0.6em; }
+  div.slide table.protocol_stack tr td { border: 1px solid black; padding-left: 1em; padding-right: 1em; text-align: center; }
+  div.slide table.protocol_stack tr th {
+    border: 1px solid black;
+    padding-left: 1em;
+    padding-right: 1em; text-align: center;
+    width: 50%;
+  }
+  div.slide pre { font-size: 0.5em; }
+  img.mine { height: 15em; width: 15em; }
+  img.right { margin-left: 1.5em; float: right; }
+  img.left { margin-right: 1.5em; float: left; }
+  img.dot { width: 0.75em; }
+
+title_page:
+  - Perl Infrastructure for 2014 and beyond
+  - Graham THE Ollis
+  - 7 January 2014
+
+slides:
+
+  - - Overview
+    - Welcome to the future
+    - Alien
+    - - Alien::Base
+      - Alien::Libarchive
+      - 'Alien:: the next generation'
+    - FFI
+    - - FFI::Raw
+      - FFI::Sweet
+      - FFI::Util
+
+  - - Welcome to the future
+    - html: |
+              <img class="mine left" src="../alienffi/spinner.jpg" />
+    - it's 2014 and we should have something better than XS
+    - FFI - Foreign Function Interface
+    - Link to DLLs or .so files at runtime
+    - Where to find the DLLs or .so files in a portable way?
+    - Maybe Alien can help.
+
+  - - Alien
+    - html: |
+              <img class="mine right" src="../alienffi/alien.jpg" />
+    - Namespace for stuff that isn't "native" to CPAN
+    - - C/C++ libraries
+      - build tools
+      - Fortran matrix manipulations
+      - whatever
+      - Alien.pm is just documentation
+
+  - - Alien::Base
+    - html: |
+              <img class="mine left" src="../alienffi/base.png" />
+    - 'base class that provides help in constructing Alien:: distributions'
+    - Huge improvement over Alien.pm
+    - autoconf (GNU) centric
+    - pkg-config friendly
+    - uses system libraries if they can be probed using pkg-config
+    - not especially portable
+    - favors dynamic libraries (good for FFI)
+    
+  - - Alien::Libarchive
+    - Real easy with Alien::Base right?
+    - dist.ini
+    - html: |
+              <pre>
+              [Alien]
+              repo = http://www.libarchive.org/downloads/
+              name = libarchive
+              pattern = libarchive-([\d\.]+)\.tar\.gz
+              
+              build_command = %pconfigure --prefix=%s --disable-bsdtar --disable-bsdcpio
+              build_command = make
+              ; also pretty easy to do with a Build.PL if you don't like Dist::Zilla
+              </pre>
+    - Alien/Libarchive.pm
+    - sh_perl: |
+                 package Alien::Libarchive;
+                 
+                 use base 'Alien::Base';
+                 
+                 1;
+    - That was awesome we're done right?
+
+  - - Alien::Libarchive (well, almost)
+    - html: |
+              <center><img class="mine" src="../alienffi/missedit.png" /></center>
+    
+  - - Alien::Libarchive (system vs. source install)
+    - '<img class="dot" src="../alienffi/error.png" /> this breaks: '
+    - html: |
+              <pre>
+              % cpanm Alien::Libarchive
+              ...
+              % sudo apt-get libarchive-dev
+              ...
+              % cpanm Archive::Libarchive::XS
+              ...
+              t/list_contents_of_archive.t .. Can't load '/home/ollisg/dev/Archive-Libarchive-
+              XS/.build/2FkGCFgZ1T/blib/arch/auto/Archive/Libarchive/XS/XS.so' for module Arch
+              ive::Libarchive::XS: libarchive.so.13: cannot open shared object file: No such f
+              ile or directory at /home/ollisg/perl5/perlbrew/perls/perl-5.18.1/lib/5.18.1/x86
+              _64-linux/DynaLoader.pm line 190.
+               at t/list_contents_of_archive.t line 3.
+              ...
+              </pre>
+    - '<img class="dot" src="../alienffi/ok.png" /> although this does not:'
+    - html: |
+              <pre>
+              % cpanm Alien::Libarchive
+              % sudo apt-get libarchive-dev
+              % cpanm Archive::Libarchive::FFI
+              </pre>
+    - so no big deal for FFI, but still good to fix
+  
+  - - Alien::Libarchive (patch the first)
+    - '<img class="dot" src="../alienffi/ok.png" /> simple fix is to prefer the library that you used when installed'
+    - sh_perl: |
+                 # workaround for Alien::Base gh#30
+                 sub import
+                 {
+                   my $class = shift;
+                    
+                   if($class->install_type('share'))
+                   {
+                     unshift @DynaLoader::dl_library_path, 
+                       grep { s/^-L// } 
+                       shellwords( $class->libs );
+                      
+                   }
+                    
+                   $class->SUPER::import(@_);
+                 }
+    - '<img class="dot" src="../alienffi/ok.png" /> also a single line patch on Alien::Base that will hopefully one day be accepted'
+
+  - - Alien::Libarchive (cygwin)
+    - '<img class="dot" src="../alienffi/error.png" /> Since libarchive makes a .dll this also breaks:'
+    - html: |
+              <pre>
+              cygwin% cpanm Alien::Libarchive
+              ...
+              cygwin% cpanm Archive::Libarchive::XS -v
+              ...
+              t/use.t .................................. 1/1 
+              #   Failed test 'use Archive::Libarchive::XS;'
+              #   at t/use.t line 5.
+              #     Tried to use 'Archive::Libarchive::XS'.
+              #     Error:  Can't load '/cygdrive/d/dev/Archive-Libarchive-XS/Archive-Libarchi
+              ve-XS-0.01/blib/arch/auto/Archive/Libarchive/XS/XS.dll' for module Archive::Liba
+              rchive::XS: No such file or directory at /usr/lib/perl5/5.14/i686-cygwin-threads
+              -64int/DynaLoader.pm line 190.
+              #  at /cygdrive/d/dev/Archive-Libarchive-XS/Archive-Libarchive-XS-0.01/blib/lib/
+              Archive/Libarchive/XS.pm line 20.
+              # BEGIN failed--compilation aborted at /cygdrive/d/dev/Archive-Libarchive-XS/Arc
+              hive-Libarchive-XS-0.01/blib/lib/Archive/Libarchive/XS.pm line 20.
+              # Compilation failed in require at (eval 4) line 2.
+              # BEGIN failed--compilation aborted at (eval 4) line 2.
+              # Looks like you failed 1 test of 1.
+              ...
+              </pre>
+    - '<img class="dot" src="../alienffi/ok.png" /> again not a big deal for FFI'
+
+  - - Alien::Libarchive (patch the second)
+    - '<img class="dot" src="../alienffi/ok.png" /> fix that too'
+    - sh_perl: |
+                 sub import
+                 {
+                   my $class = shift;
+                    
+                   if($class->install_type('share'))
+                   {
+                     unshift @DynaLoader::dl_library_path, 
+                       grep { s/^-L// } 
+                       shellwords( $class->libs );
+                      
+                     # see Alien::Base gh#32
+                     if($^O eq 'cygwin')
+                     {
+                       foreach my $dir (qw( .libs bin ))
+                       {
+                         # will need something similar for MSWin32
+                         $dir = File::Spec->catdir($class->dist_dir, $_);
+                         $ENV{PATH} = join(':', $dir, $ENV{PATH}) if -d $dir;
+                       }
+                     }
+                  
+                   }
+                    
+                   $class->SUPER::import(@_);
+                 }
+    - Fix for this makes a little less sense in the base class
+
+  - - Alien::Libarchive (MSWin32 / Strawberry Perl)
+    - '<img class="dot" src="../alienffi/error.png" /> libarchive uses CMAKE on Windows so Alien::Base is mostly useless without extensive subclassing'
+    - Alien::CMake is on CPAN
+    - - needed a minor patch to build libarchive   
+      - '<img class="dot" src="../alienffi/ok.png" /> which was accepted'
+    - some libraries even use autoconf on MSWin32
+    - - Alien::MSYS for libraries that use autoconf on MSWin32
+    
+  - - Alien::Libarchive (patch the third)
+    - '<img class="dot" src="../alienffi/ok.png" /> use a specalized distribution for MSWin32'
+    - sh_perl: |
+                 if($^O eq 'MSWin32')
+                 {
+                   eval q{ use Alien::Libarchive::MSWin32 };
+                   die $@ if $@;
+                   foreach my $subname (qw( new libs cflags ))
+                   {
+                     eval qq{ sub $subname { shift; Alien::Libarchive::MSWin32->$subname(\@_) } };
+                     die $@ if $@;
+                   }
+                 }
+                 else
+                 {
+                   require Alien::Libarchive::Unix;
+                 }
+    - cannot subclass
+    - - '<img class="dot" src="../alienffi/error.png" /> Alien::Base uses File::ShareDir with class name'
+
+  - - Alien::Libarchive (testing)
+    - easy with Test::CChecker
+    - - (uses ExtUtils::CChecker)
+    - sh_perl: |
+                 use Test::More tests => 1;
+                 use Test::CChecker;
+                 use Alien::Libarchive;
+                 
+                 compile_with_alien 'Alien::Libarchive';
+                 
+                 compile_run_ok do { local $/; <DATA> }, "basic compile test";
+                 
+                 __DATA__
+                 
+                 #include <archive.h>
+                 
+                 int
+                 main(int argc, char *argv[])
+                 {
+                   int r;
+                   struct archive *a;
+                   
+                   a = archive_read_new();
+                   if(a == NULL)
+                     return 2;
+                   archive_read_free(a);
+                   return 0;
+                 }
+
+
+  - - Alien::Libarchive (reinstalling)
+    - '<img class="dot" src="../alienffi/error.png" /> this can potentially break'
+    - html: |
+              <pre>
+              % cpanm Alien::Libarchive
+              % cpanm Archive::Libarchive::XS
+              ... time passes ...
+              % cpanm Alien::Libarchive
+              </pre>
+
+  - - Alien::Libarchive (upgrading)
+    - you may have an old version
+    - html: |
+              <pre>
+              % cpanm Alien::Libarchive
+              ... time passes ...
+              % cpanm Archive::Libarchive::XS
+              % cpanm Archive::Libarchive::FFI
+              </pre>
+    - Archive::Libarchive::XS/FFI
+    - - '<img class="dot" src="../alienffi/error.png" /> might require a newer version of libarchive than was available when Alien::Libarchive was installed'
+      - '<img class="dot" src="../alienffi/error.png" /> or maybe a newer version than is provided by the operating system'
+
+  - - 'Alien::Base (<img class="dot" src="../alienffi/error.png" /> challenges)'
+    - installing / uninstalling system libraries can break already installed Perl script
+    - - (installing libxyz-dev after Alien::XYZ)
+    - reinstalling / upgrading Alien::XYZ can break XYZ::XS
+    - Doesn't handle xyz.dll that comes bundled with libxyz on Windows
+    
