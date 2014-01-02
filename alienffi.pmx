@@ -78,8 +78,7 @@ slides:
   - - Alien::Libarchive
     - Real easy with Alien::Base right?
     - dist.ini
-    - html: |
-              <pre>
+    - text: |
               [Alien]
               repo = http://www.libarchive.org/downloads/
               name = libarchive
@@ -88,7 +87,6 @@ slides:
               build_command = %pconfigure --prefix=%s --disable-bsdtar --disable-bsdcpio
               build_command = make
               ; also pretty easy to do with a Build.PL if you don't like Dist::Zilla
-              </pre>
     - Alien/Libarchive.pm
     - sh_perl: |
                  package Alien::Libarchive;
@@ -104,8 +102,7 @@ slides:
     
   - - Alien::Libarchive (system vs. source install)
     - '<img class="dot" src="../alienffi/error.png" /> this breaks: '
-    - html: |
-              <pre>
+    - text: |
               % cpanm Alien::Libarchive
               ...
               % sudo apt-get libarchive-dev
@@ -119,14 +116,11 @@ slides:
               _64-linux/DynaLoader.pm line 190.
                at t/list_contents_of_archive.t line 3.
               ...
-              </pre>
     - '<img class="dot" src="../alienffi/ok.png" /> although this does not:'
-    - html: |
-              <pre>
+    - text: |
               % cpanm Alien::Libarchive
               % sudo apt-get libarchive-dev
               % cpanm Archive::Libarchive::FFI
-              </pre>
     - so no big deal for FFI, but still good to fix
   
   - - Alien::Libarchive (patch the first)
@@ -151,8 +145,7 @@ slides:
 
   - - Alien::Libarchive (cygwin)
     - '<img class="dot" src="../alienffi/error.png" /> Since libarchive makes a .dll this also breaks:'
-    - html: |
-              <pre>
+    - text: |
               cygwin% cpanm Alien::Libarchive
               ...
               cygwin% cpanm Archive::Libarchive::XS -v
@@ -173,7 +166,6 @@ slides:
               # BEGIN failed--compilation aborted at (eval 4) line 2.
               # Looks like you failed 1 test of 1.
               ...
-              </pre>
     - '<img class="dot" src="../alienffi/ok.png" /> again not a big deal for FFI'
 
   - - Alien::Libarchive (patch the second)
@@ -235,7 +227,7 @@ slides:
     - - '<img class="dot" src="../alienffi/error.png" /> Alien::Base uses File::ShareDir with class name'
 
   - - Alien::Libarchive (testing)
-    - easy with Test::CChecker
+    - '<img class="dot" src="../alienffi/ok.png" /> easy with Test::CChecker'
     - - (uses ExtUtils::CChecker)
     - sh_perl: |
                  use Test::More tests => 1;
@@ -264,30 +256,50 @@ slides:
                  }
 
 
+  - - Alien::Libarchive (staging for testing)
+    - '<img class="dot" src="../alienffi/error.png" /> Alien::Base does not provide a good way to test before install'
+    - '<img class="dot" src="../alienffi/ok.png" /> Work around is to customize the install'
+    - text: |
+              repo = http://www.libarchive.org/downloads/
+              name = libarchive
+              pattern = libarchive-([\d\.]+)\.tar\.gz
+              
+              build_command = %pconfigure --prefix=%s --disable-bsdtar --disable-bsdcpio
+              build_command = make
+              ; could also do DESTDIR=`pwd`/../../_test but that is not portable
+              build_command = make DESTDIR=%d/_test install
+    - and sub class the installer
+    - sh_perl: |
+                 sub alien_interpolate
+                 {
+                   my($self, $string) = @_;
+                   $string =~ s/(?<!\%)\%d/$FindBin::Bin/eg;
+                   $self->SUPER::alien_interpolate($string);
+                 }
+
+
   - - Alien::Libarchive (reinstalling)
     - '<img class="dot" src="../alienffi/error.png" /> this can potentially break'
-    - html: |
-              <pre>
+    - text: |
               % cpanm Alien::Libarchive
               % cpanm Archive::Libarchive::XS
               ... time passes ...
               % cpanm Alien::Libarchive
-              </pre>
 
   - - Alien::Libarchive (upgrading)
     - you may have an old version
-    - html: |
-              <pre>
+    - text: |
               % cpanm Alien::Libarchive
               ... time passes ...
               % cpanm Archive::Libarchive::XS
               % cpanm Archive::Libarchive::FFI
-              </pre>
     - Archive::Libarchive::XS/FFI
     - - '<img class="dot" src="../alienffi/error.png" /> might require a newer version of libarchive than was available when Alien::Libarchive was installed'
       - '<img class="dot" src="../alienffi/error.png" /> or maybe a newer version than is provided by the operating system'
 
   - - 'Alien::Base (<img class="dot" src="../alienffi/error.png" /> challenges)'
+    - html: |
+              <img class="mine right" src="../alienffi/marvin.png" />
     - installing / uninstalling system libraries can break already installed Perl script
     - - (installing libxyz-dev after Alien::XYZ)
     - reinstalling / upgrading Alien::XYZ can break XYZ::XS
